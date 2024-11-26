@@ -8,7 +8,6 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-import sun.awt.im.InputMethodWindow;
 import sun.misc.SharedSecrets;
 
 /**
@@ -87,7 +86,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
 	}
 
 	private void ensureCapacityInternal(int minCapacity) {
-		ensureExplicitCapacity(calculateCapacity(elementData,minCapacity));
+		ensureExplicitCapacity(calculateCapacity(elementData, minCapacity));
 	}
 
 	private void ensureExplicitCapacity(int minCapacity) {
@@ -131,7 +130,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
 	}
 
 	public boolean contains(Object o) {
-		return indexOf(0) > 0;
+		return indexOf(o) > 0;
 	}
 
 	public int indexOf(Object o) {
@@ -238,7 +237,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
 
 		int numMoved = size - index - 1;
 		if (numMoved > 0) {
-			System.arraycopy(elementData,index + 1,elementData,index,numMoved);
+			System.arraycopy(elementData, index + 1, elementData, index, numMoved);
 		}
 		elementData[--size] = null;
 
@@ -288,7 +287,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
 		Object[] a = c.toArray();
 		int numNew = a.length;
 		ensureCapacityInternal(size + numNew);
-		System.arraycopy(a,0,elementData,size,numNew);
+		System.arraycopy(a, 0, elementData, size, numNew);
 		size += numNew;
 		return numNew != 0;
 	}
@@ -301,9 +300,9 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
 		ensureCapacityInternal(size + numNew);
 		int numMoved = size - index;
 		if (numMoved > 0) {
-			System.arraycopy(elementData,index,elementData,index + numNew,numMoved);
+			System.arraycopy(elementData, index, elementData, index + numNew, numMoved);
 		}
-		System.arraycopy(a,0,elementData,index,numNew);
+		System.arraycopy(a, 0, elementData, index, numNew);
 		size += numNew;
 		return numNew != 0;
 	}
@@ -311,11 +310,11 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
 	protected void removeRange(int fromIndex, int toIndex) {
 		modCount++;
 		int numMoved = size - toIndex;
-		System.arraycopy(elementData,toIndex,elementData,fromIndex,numMoved);
+		System.arraycopy(elementData, toIndex, elementData, fromIndex, numMoved);
 
 		int newSize = size - (toIndex - fromIndex);
 		for (int i = newSize; i < size; i++) {
-			elementData[i] = numMoved;
+			elementData[i] = null;
 		}
 		size = newSize;
 	}
@@ -414,7 +413,8 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
 		int lastRet = -1;
 		int expectedModCount = modCount;
 
-		Itr() {}
+		Itr() {
+		}
 
 		@Override
 		public boolean hasNext() {
@@ -528,7 +528,39 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
 				throw new ConcurrentModificationException();
 			}
 		}
-
-
 	}
+
+	public List<E> subList(int fromIndex, int toIndex) {
+		subListRangeCheck(fromIndex, toIndex, size);
+		return new SubList<>(this, fromIndex, toIndex);
+	}
+
+	private static class SubList<E> extends AbstractList<E> implements RandomAccess {
+		private final ArrayList<E> root;
+		private final SubList<E> parent;
+		private final int offset;
+		private int size;
+
+		public SubList(ArrayList<E> root, int fromIndex, int toIndex) {
+			this.root = root;
+			this.parent = null;
+			this.offset = fromIndex;
+			this.size = toIndex - fromIndex;
+			this.modCount = root.modCount;
+		}
+
+		private SubList(SubList<E> parent, int fromIndex, int toIndex) {
+			this.root = parent.root;
+			this.parent = parent;
+			this.offset = parent.offset + fromIndex;
+			this.size = toIndex - fromIndex;
+			this.modCount = parent.modCount;
+		}
+
+		public E set(int index, E element) {
+			checkForComdification();
+			TODO
+		}
+	}
+
 }

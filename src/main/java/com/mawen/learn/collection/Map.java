@@ -44,20 +44,20 @@ public interface Map<K, V> {
 
 		boolean equals(Object o);
 
-		public static <K extends Comparable<? super K>, V>Comparator<Entry<K, V>> comparingByKey() {
+		static <K extends Comparable<? super K>, V>Comparator<Entry<K, V>> comparingByKey() {
 			return (c1, c2) -> c1.getKey().compareTo(c2.getKey());
 		}
 
-		public static <K, V extends Comparable<? super V>> Comparator<Entry<K, V>> comparingByValue() {
+		static <K, V extends Comparable<? super V>> Comparator<Entry<K, V>> comparingByValue() {
 			return (c1, c2) -> c1.getValue().compareTo(c2.getValue());
 		}
 
-		public static <K, V> Comparator<Entry<K, V>> comparingByKey(Comparator<? super K> cmp) {
+		static <K, V> Comparator<Entry<K, V>> comparingByKey(Comparator<? super K> cmp) {
 			Objects.requireNonNull(cmp);
 			return (c1, c2) -> cmp.compare(c1.getKey(), c2.getKey());
 		}
 
-		public static <K, V> Comparator<Entry<K, V>> comparingByValue(Comparator<? super V> cmp) {
+		static <K, V> Comparator<Entry<K, V>> comparingByValue(Comparator<? super V> cmp) {
 			Objects.requireNonNull(cmp);
 			return (c1, c2) -> cmp.compare(c1.getValue(), c2.getValue());
 		}
