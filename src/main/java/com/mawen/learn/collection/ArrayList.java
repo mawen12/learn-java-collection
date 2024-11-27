@@ -8,6 +8,7 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+import sun.awt.im.InputMethodWindow;
 import sun.misc.SharedSecrets;
 
 /**
@@ -99,6 +100,10 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
 
 	private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
+	/**
+	 * 取 minCapacity 和 curCapacity * 1.5 的最大值
+	 * @param minCapacity
+	 */
 	private void grow(int minCapacity) {
 		int oldCapacity = elementData.length;
 		int newCapacity = oldCapacity + (oldCapacity >> 1);

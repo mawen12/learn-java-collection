@@ -506,7 +506,191 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 
 		final TreeNode<K, V> putTreeVal(HashMap<K, V> map, Node<K, V>[] tab, int h, K k, V v) {
 			Class<?> kc = null;
-			TODO
+			boolean searched = false;
+			TreeNode<K, V> root = (parent != null) ? root() : this;
+			for (TreeNode<K, V> p = root; ; ) {
+				int dir, ph; K pk;
+				if ((ph = p.hash) > h) {
+					dir = -1;
+				}
+				else if (ph < h) {
+					dir = 1;
+				}
+				else if ((pk = p.key) == k || (k != null && k.equals(pk))) {
+					return p;
+				}
+				else if ((kc == null && (kc = comparableClassFor(k)) == null) || (dir = compareComparables(kc, k, pk)) == 0) {
+					if (!searched) {
+						TreeNode<K, V> q, ch;
+						searched = true;
+						if (((ch = p.left) != null && (q = ch.find(h, k, kc)) != null)
+						    || ((ch = p.right) != null && (q = ch.find(h, k, kc)) != null)) {
+							return q;
+						}
+					}
+					dir = tieBreakOrder(k, pk);
+				}
+
+				TreeNode<K, V> xp = p;
+				if ((p = (dir <= 0) ? p.left : p.right) == null) {
+					Node<K, V> xpn = xp.next;
+					TreeNode<K, V> x = map.newTreeNode(h, k, v, xpn);
+					if (dir <= 0) {
+						xp.left = x;
+					}
+					else {
+						xp.right = x;
+					}
+					xp.next = x;
+					x.parent = x.prev = xp;
+					if (xpn != null) {
+						((TreeNode<K, V>)xpn).prev = x;
+					}
+					moveRootToFront(tab,balanceInsertion(root, x));
+					return null;
+				}
+			}
+		}
+
+		final void removeTreeNode(HashMap<K, V> map, Node<K, V>[] tab, boolean movable) {
+			int n;
+			if (tab == null || (n = tab.length) == 0) {
+				return;
+			}
+
+			int index = (n - 1) & hash;
+			TreeNode<K, V> first = (TreeNode<K, V>) tab[index], root = first, rl;
+			TreeNode<K, V> succ = (TreeNode<K, V>) next, pred = prev;
+			if (pred == null) {
+				tab[index] = first = succ;
+			}
+			else {
+				pred.next = succ;
+			}
+			if (succ != null) {
+				succ.prev = pred;
+			}
+			if (first == null) {
+				return;
+			}
+			if (root.parent != null) {
+				root = root.root();
+			}
+			if (root == null || (movable && (root.right == null || (rl = root.left) == null || rl.left == null))) {
+				tab[index] = first.untreeify(map);
+				return;
+			}
+
+			TreeNode<K, V> p = this, pl = left, pr = right, replacement;
+			if (pl != null && pr != null) {
+				TreeNode<K, V> s = pr, sl;
+				while ((sl = s.left) != null) {
+					s = sl;
+				}
+				boolean c = s.red; s.red = p.red; p.red = c;
+				TreeNode<K, V> sr = s.right;
+				TreeNode<K, V> pp = p.parent;
+				if (s == pr) {
+					p.parent = s;
+					s.right = p;
+				}
+				else {
+					TreeNode<K, V> sp = s.parent;
+					if ((p.parent = sp) != null) {
+						if (s == sp.left) {
+							sp.left = p;
+						}
+						else {
+							sp.right = p;
+						}
+					}
+					if ((s.right = pr) != null) {
+						pr.parent = s;
+					}
+				}
+				p.left = null;
+				if ((p.right = sr) != null) {
+					sr.parent = p;
+				}
+
+				if ((s.left = pl) != null) {
+					pl.parent = s;
+				}
+
+				if ((s.parent = pp) == null) {
+					root = s;
+				}
+				else if (p == pp.left) {
+					pp.left = s;
+				}
+				else {
+					pp.right = s;
+				}
+
+				if (sr != null) {
+					replacement = sr;
+				}
+				else {
+					replacement = p;
+				}
+			}
+			else if (pl != null) {
+				replacement = pl;
+			}
+			else if (pr != null) {
+				replacement = pr;
+			}
+			else {
+				replacement = p;
+			}
+
+			if (replacement != p) {
+				TreeNode<K, V> pp = replacement.parent = p.parent;
+				if (pp == null) {
+					(root = replacement).red = false;
+				}
+				else if (p == pp.left) {
+					pp.left = replacement;
+				}
+				else {
+					pp.right = replacement;
+				}
+				p.left = p.right = p.parent = null;
+			}
+
+			TreeNode<K, V> r = p.red ? root : balanceDeletion(root, replacement);
+
+			if (replacement == p) {
+				TreeNode<K, V> pp = p.parent;
+				p.parent = null;
+				if (pp != null) {
+					if (p == pp.left) {
+						pp.left = null;
+					}
+					else if (p == pp.right) {
+						pp.right = null;
+					}
+				}
+			}
+
+			if (movable) {
+				moveRootToFront(tab,r);
+			}
+		}
+
+
+		static <K, V> boolean checkInvariants(TreeNode<K, V> t) {
+			TreeNode<K, V> tp = t.parent, tl = t.left, tr = t.right, tb = t.prev, tn = (TreeNode<K, V>) t.next;
+			if (tb != null && tb.next != t) {
+				return false;
+			}
+			if (tn != null && tb.prev != t) {
+				return false;
+			}
+			if (tp != null && t != tp.left && t != tp.right) {
+				return false;
+			}
+			if (tl != null && )
 		}
 	}
 
