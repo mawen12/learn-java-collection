@@ -679,20 +679,31 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
 		}
 
 
+		static <K, V> TreeNode<K, V> balanceDeletion(TreeNode<K, V> root, TreeNode<K, V> x) {
+			for (TreeNode<K, V> xp, xpl, xpr; ; ) {
+
+			}
+		}
+
 		static <K, V> boolean checkInvariants(TreeNode<K, V> t) {
 			TreeNode<K, V> tp = t.parent, tl = t.left, tr = t.right, tb = t.prev, tn = (TreeNode<K, V>) t.next;
-			if (tb != null && tb.next != t) {
+			if (tb != null && tb.next != t)
 				return false;
-			}
-			if (tn != null && tb.prev != t) {
+			if (tn != null && tb.prev != t)
 				return false;
-			}
-			if (tp != null && t != tp.left && t != tp.right) {
+			if (tp != null && t != tp.left && t != tp.right)
 				return false;
-			}
-			if (tl != null && )
+			if (tl != null && (tl.parent != t || tl.hash > t.hash))
+				return false;
+			if (tr != null && (tr.parent != t || tr.hash < t.hash))
+				return false;
+			if (t.red && tl != null && tl.red && tr != null && tr.red)
+				return false;
+			if (tl != null && !checkInvariants(tl))
+				return false;
+			if (tr != null && !checkInvariants(tr))
+				return false;
+			return true;
 		}
 	}
-
-
 }
